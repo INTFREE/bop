@@ -1,62 +1,35 @@
-# import httplib, urllib, base64, json
-#
-# ###############################################
-# #### Update or verify the following values. ###
-# ###############################################
-#
-# # Replace the subscription_key string value with your valid subscription key.
-# subscription_key = 'ed496164086047439ddbe7c54e5920a0'
-#
-# # Replace or verify the region.
-# #
-# # You must use the same region in your REST API call as you used to obtain your subscription keys.
-# # For example, if you obtained your subscription keys from the westus region, replace
-# # "westcentralus" in the URI below with "westus".
-# #
-# # NOTE: Free trial subscription keys are generated in the westcentralus region, so if you are using
-# # a free trial subscription key, you should not need to change this region.
-# uri_base = 'westus.api.cognitive.microsoft.com'
-#
-# # Request headers.
-# headers = {
-#     'Content-Type': 'application/json',
-#     'Ocp-Apim-Subscription-Key': subscription_key,
-# }
-#
-# # Request parameters.
-# params = urllib.urlencode({
-#     'returnFaceId': 'true',
-#     'returnFaceLandmarks': 'false',
-#     'returnFaceAttributes': 'age,gender,headPose,smile,facialHair,glasses,emotion,hair,makeup,occlusion,accessories,blur,exposure,noise',
-# })
-#
-# # The URL of a JPEG image to analyze.
-# body = "{'url':'https://upload.wikimedia.org/wikipedia/commons/c/c3/RH_Louise_Lillian_Gish.jpg'}"
-#
-# try:
-#     # Execute the REST API call and get the response.
-#     conn = httplib.HTTPSConnection('westus.api.cognitive.microsoft.com')
-#     conn.request("POST", "/face/v1.0/detect?%s" % params, body, headers)
-#     response = conn.getresponse()
-#     data = response.read()
-#
-#     # 'data' contains the JSON data. The following formats the JSON data for display.
-#     parsed = json.loads(data)
-#     print ("Response:")
-#     print (json.dumps(parsed, sort_keys=True, indent=2))
-#     conn.close()
-#
-# except Exception as e:
-#     print("[Errno {0}] {1}".format(e.errno, e.strerror))
+#coding=utf8
+import sys
+reload(sys)
+sys.setdefaultencoding('utf8')
 import cognitive_face as CF
 
 KEY = 'ed496164086047439ddbe7c54e5920a0'  # Replace with a valid Subscription Key here.
 CF.Key.set(KEY)
-
 BASE_URL = 'https://westus.api.cognitive.microsoft.com/face/v1.0/'  # Replace with your regional Base URL
 CF.BaseUrl.set(BASE_URL)
 
-img_url = 'https://raw.githubusercontent.com/Microsoft/Cognitive-Face-Windows/master/Data/detection1.jpg'
-result = CF.face.detect(img_url,landmarks=True,attributes='age,gender,headPose,smile,facialHair,glasses,emotion,hair,makeup,occlusion,accessories,blur,exposure,noise');
-CF.person_group.create('team')
-print result
+#result = CF.face.detect(img_url,landmarks=True,attributes='age,gender,headPose,smile,facialHair,glasses,emotion,hair,makeup,occlusion,accessories,blur,exposure,noise');
+#result = CF.person.create('1','miaorui')
+#result = CF.person.add_face('http://y-doctor-oss.oss-cn-shenzhen.aliyuncs.com/match/miaorui3.jpeg','1',id_miaorui)
+#result = CF.person.delete_face('1',id_panhong,'b50fd6db-d0ba-40be-820e-e71186e46084')
+
+id = {
+    '4aca3d42-d712-4cc1-9505-95843d7a328b':'王丰',
+    '9cf2d44d-5980-4feb-adc1-7c6c972d4fa4':'潘虹',
+    '2a0e8751-a531-499c-a37f-1c58d6fcf17b':'苗睿'
+}
+
+def get_user_info(file_name):
+    data = open(file_name)
+    img_result = CF.face.detect(data)[0]
+    user_id = img_result.get('faceId')
+    user_result = CF.face.identify([user_id],'1')[0]
+    try:
+        user = user_result['candidates'][0]['personId']
+        return id[user]
+    except Exception,e:
+        return -1
+
+if __name__ == '__main__' :
+    print get_user_info('/Users/wangpei/Desktop/WechatIMG8470.jpeg')
